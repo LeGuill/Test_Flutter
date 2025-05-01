@@ -5,10 +5,10 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-// Middleware
-app.use(cors()); // Activer CORS pour toutes les origines
-app.use(express.json()); // Pour parser le JSON des requêtes entrantes
-app.use(express.urlencoded({ extended: true })); // Pour parser les données de formulaire URL-encoded
+// Middleware (fonctions qui s'exécutent entre le moment où le serveur reçoit une requête et le moment où il envoie une réponse.)
+app.use(cors()); // Activer CORS pour toutes les origines (accepte les requêtes venant d'autres origines, ports)
+app.use(express.json()); // Pour parser le JSON des requêtes entrantes (Permet à Express de comprendre les données envoyées au format JSON dans le corps des requêtes)
+app.use(express.urlencoded({ extended: true })); // Pour parser les données de formulaire URL-encoded (Permet à Express de comprendre les données envoyées via des formulaires HTML classiques)
 
 // Routes
 app.get('/', (req, res) => {
