@@ -1,0 +1,55 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VSCode project files
+.vscode/  # UNCOMMENT THIS LINE IF YOU USE VS CODE
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+# /build/web # No need to explicitly ignore web, build/ ignores everything inside.
+!pubspec.lock 
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+android/build/
+# /android/app/debug
+# /android/app/profile
+# /android/app/release
+
+# Generalize Android
+# android/.gradle
+# android/app/build/outputs/
+
+# iOS
+ios/build/
+ios/.symlinks/
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Podfile.lock

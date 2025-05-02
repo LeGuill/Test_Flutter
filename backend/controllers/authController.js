@@ -30,7 +30,7 @@ const register = async (req, res, next) => {
     const [existingUsers] = await db.query('SELECT email FROM users WHERE email = ?', [email]);
 
     if (existingUsers.length > 0) {
-      return res.status(409).json({ message: 'Email already exists' }); // 409 Conflict
+      return res.status(409).json({ message: 'Email already used' }); // 409 Conflict
     }
 
     // 2. Hasher le mot de passe
