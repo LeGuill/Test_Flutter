@@ -13,10 +13,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Reno Energie Registration',
       theme: ThemeData(
-        primarySwatch: Colors.blue, // Tu peux personnaliser le thème
+        primarySwatch: Colors.blue, // PERSONNALISER LA COULEUR PRINCIPALE
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        // Tu peux définir ici des styles globaux (polices, couleurs, etc.)
-        // pour te rapprocher du design Dribbble.
+        // DEFINIR LE THEME ICI
          inputDecorationTheme: InputDecorationTheme( // Style de base pour les champs
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
@@ -27,7 +26,7 @@ class MyApp extends StatelessWidget {
             borderSide: BorderSide(color: Theme.of(context).primaryColor),
           ),
           filled: true,
-          fillColor: Colors.grey.shade100, // Couleur de fond légère
+          fillColor: Colors.grey.shade100, // Couleur de fond 
         ),
         elevatedButtonTheme: ElevatedButtonThemeData( // Style de base pour le bouton
           style: ElevatedButton.styleFrom(
