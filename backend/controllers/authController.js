@@ -16,7 +16,7 @@ const register = async (req, res, next) => {
   const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10'); // Nombre de tours pour bcrypt
 
   // --- Validation Côté Serveur ---
-  if (!userType || !firstName || !businessEmail || !password || !acceptedPrivacyPolicy || !companyLocation || !industry) {
+  if (!userType || !firstName || !email || !password || !acceptedPrivacyPolicy || !companyLocation || !industry) {
 
     return res.status(400).json({ message: 'Missing required fields (user type, first name, email, password, privacy policy acceptance)' });
   }
@@ -74,7 +74,7 @@ const [result] = await db.query(
   ]
 );
 
-console.log('User registered:', { id: result.insertId, email: businessEmail }); // Log avec businessEmail
+console.log('User registered:', { id: result.insertId, email: email }); // Log avec businessEmail
 
 
     // 4. Envoyer une réponse de succès

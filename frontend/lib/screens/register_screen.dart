@@ -166,14 +166,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final formWidth = screenWidth * 0.4; // Define panel width
 
     return Scaffold(
-      backgroundColor: darkBackgroundColor, // Base background is dark
+      // backgroundColor: darkBackgroundColor, // Base background is dark
       body: Stack(
         children: [
           // --- Layer 1: Dark Background (Always visible) ---
 Container(
             width: double.infinity, // Assure qu'il prend toute la largeur
             height: double.infinity, // Assure qu'il prend toute la hauteur
-            color: darkBackgroundColor, // Couleur de fond principale
+            decoration: BoxDecoration(
+              image: DecorationImage(
+              image: AssetImage('assets/images/background.jpg'), // <-- Chemin vers TON image
+              fit: BoxFit.cover, // <-- Pour que l'image couvre tout l'écran (responsive)
+            ),
+),
             // Ajouter du Padding général pour le contenu
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 40.0), // Ajuste le padding
