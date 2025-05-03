@@ -3,9 +3,10 @@ import 'package:http/http.dart' as http; // Pour les requêtes HTTP
 import 'dart:convert'; // Pour encoder/décoder le JSON
 
 // Importe les widgets extraits du sous-dossier 'widgets'
-import './widgets/background_layer.dart';
-import './widgets/sliding_form_panel.dart';
-import './widgets/open_form_button.dart';
+// Assurez-vous que ces chemins sont corrects par rapport à votre structure
+import 'widgets/background_layer.dart';
+import 'widgets/sliding_form_panel.dart';
+import 'widgets/open_form_button.dart';
 
 // --- Widget principal de l'écran (Stateful car l'état change) ---
 class RegisterScreen extends StatefulWidget {
@@ -22,7 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // --- Constantes de Couleur (pourraient être dans un fichier theme.dart) ---
   static const Color formBackgroundColor = Colors.white;
-  static const Color primaryRedColor = Color.fromARGB(255, 255, 0, 0);
+  static const Color primaryRedColor = Color.fromARGB(255, 255, 0, 0); // Modifié en rouge
   static const Color greyTextColor = Colors.grey;
   static const Color darkTextColor = Color(0xFF333333);
   static const Color lightTextColor = Colors.white70;
@@ -86,18 +87,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // --- Logique d'Inscription ---
   Future<void> _register() async {
     setState(() { _errorMessage = null; });
-
-    // 1. Valider le formulaire
     if (!_formKey.currentState!.validate()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Veuillez corriger les erreurs dans le formulaire'), backgroundColor: Colors.red),
         );
       }
-      return; // Arrêter si invalide
+      return;
     }
-
-    // 2. Activer le chargement et préparer les données
     setState(() { _isLoading = true; });
     final dataToSend = {
       'userType': _selectedUserType,
@@ -109,8 +106,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'password': _passwordController.text,
       'acceptedPrivacyPolicy': _acceptedPrivacyPolicy,
     };
-
-    // 3. Envoyer la requête (remplacer l'URL)
     const String apiUrl = 'http://localhost:3000/api/auth/register'; // <-- METTRE VOTRE URL
     try {
       final response = await http.post(
@@ -118,20 +113,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode(dataToSend),
       );
-
-      // 4. Traiter la réponse
       dynamic responseBody;
-      try {
-        responseBody = jsonDecode(response.body);
-      } catch (e) {
-        print("Erreur de décodage JSON : $e | Réponse : ${response.body}");
-        responseBody = {'message': 'Réponse invalide du serveur (Statut : ${response.statusCode})'};
+      try { responseBody = jsonDecode(response.body); }
+      catch (e) {
+         print("Erreur de décodage JSON : $e | Réponse : ${response.body}");
+         responseBody = {'message': 'Réponse invalide du serveur (Statut : ${response.statusCode})'};
       }
-
-      if (response.statusCode == 201) { // Succès
+      if (response.statusCode == 201) {
         final successMsg = responseBody['message'] ?? 'Inscription réussie !';
         setState(() {
-          // Réinitialiser l'état et les champs
+          _isLoading = false;
           _formKey.currentState?.reset();
           _firstNameController.clear();
           _emailController.clear();
@@ -141,47 +132,60 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _selectedIndustry = null;
           _acceptedPrivacyPolicy = false;
           _selectedUserType = 'merchant';
-          // _isFormVisible = false; // Optionnel: fermer le panneau
+          // _isFormVisible = false;
         });
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(successMsg), backgroundColor: Colors.green, duration: const Duration(seconds: 3)),
           );
         }
-      } else { // Erreur du backend
-        setState(() {
-          _errorMessage = responseBody['message'] ?? 'Une erreur est survenue : Statut ${response.statusCode}';
-        });
+      } else {
+        setState(() { _errorMessage = responseBody['message'] ?? 'Une erreur est survenue : Statut ${response.statusCode}'; });
       }
-    } catch (e) { // Erreur réseau
+    } catch (e) {
       print('Erreur d\'inscription : $e');
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Impossible de se connecter au serveur. Veuillez réessayer.';
-        });
-      }
+      if (mounted) { setState(() { _errorMessage = 'Impossible de se connecter au serveur. Veuillez réessayer.'; }); }
     } finally {
-      // Assurer que le chargement s'arrête
-      if (mounted) {
-        setState(() { _isLoading = false; });
-      }
+      if (mounted) { setState(() { _isLoading = false; }); }
     }
   }
 
   // --- Méthode Build Principale ---
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final formWidth = screenWidth * 0.4; // Ajustez ce ratio si nécessaire
+    // Récupère les informations de l'écran
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+
+    // --- Calcul Adaptatif de la Largeur du Formulaire ---
+    // Définit des points de rupture (breakpoints) pour différentes tailles d'écran
+    const double mobileBreakpoint = 600; // Limite pour considérer comme mobile/étroit
+    const double tabletBreakpoint = 1000; // Limite pour considérer comme tablette/moyen
+
+    double formWidth;
+    if (screenWidth < mobileBreakpoint) {
+      // Sur mobile (portrait), prend presque toute la largeur
+      formWidth = screenWidth * 0.9;
+    } else if (screenWidth < tabletBreakpoint) {
+      // Sur tablette ou mobile paysage, largeur fixe raisonnable
+      formWidth = 500;
+    } else {
+      // Sur grand écran (desktop), un pourcentage
+      formWidth = screenWidth * 0.4;
+    }
+    // On peut aussi ajouter une largeur minimale et maximale
+    formWidth = formWidth.clamp(300, 600); // Exemple: largeur min 300px, max 600px
 
     return Scaffold(
       // Pas de backgroundColor ici, géré par BackgroundLayer
       body: Stack( // Superpose les couches
         children: [
           // Couche 1: Fond et contenu statique
-          const BackgroundLayer(
-            // Passe les constantes nécessaires si elles ne sont pas définies dans BackgroundLayer
+          // <<< CORRECTION ICI : Ajout des paramètres manquants et suppression de const >>>
+          BackgroundLayer(
             lightTextColor: lightTextColor,
+            screenWidth: screenWidth,         // Paramètre requis ajouté
+            mobileBreakpoint: mobileBreakpoint, // Paramètre requis ajouté
           ),
 
           // Couche 2: Panneau de formulaire coulissant
@@ -189,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             // État et dimensions
             isVisible: _isFormVisible,
             slideDuration: _slideDuration,
-            formWidth: formWidth,
+            formWidth: formWidth, // Utilise la largeur calculée
             // Clé et contrôleurs du formulaire
             formKey: _formKey,
             firstNameController: _firstNameController,
@@ -211,7 +215,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             onUserTypeChanged: (value) => setState(() => _selectedUserType = value),
             onCompanyLocationChanged: (value) => setState(() => _selectedCompanyLocation = value),
             onIndustryChanged: (value) => setState(() => _selectedIndustry = value),
-            // Le callback pour la checkbox met directement à jour l'état
             onPrivacyPolicyChanged: (value) => setState(() => _acceptedPrivacyPolicy = value ?? false),
             // Callback pour la soumission
             onRegister: _register,
