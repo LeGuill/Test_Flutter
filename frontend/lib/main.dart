@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Reno Energie Registration',
+      title: 'Test Flutter',
       theme: ThemeData(
         primarySwatch: Colors.blue, // PERSONNALISER LA COULEUR PRINCIPALE
         visualDensity: VisualDensity.adaptivePlatformDensity,

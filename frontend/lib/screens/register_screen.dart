@@ -15,109 +15,135 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   // --- Class-Level Color Constants ---
-  static const Color darkBackgroundColor = Color.fromRGBO(25, 25, 25, 0.98);
-  static const Color formBackgroundColor = Colors.white;
-  static const Color primaryOrangeColor = Color(0xFFF56600); // Adjust as needed
-  static const Color greyTextColor = Colors.grey;
-  static const Color darkTextColor = Color(0xFF333333);
-  static const Color lightTextColor = Colors.white70;
-  static const Color toggleButtonBg = Color(0xFFF0F0F0);
+  // Définition des couleurs utilisées dans l'UI
+  static const Color darkBackgroundColor = Color.fromRGBO(25, 25, 25, 0.98); // Couleur de fond sombre (non utilisée directement si image de fond)
+  static const Color formBackgroundColor = Colors.white; // Couleur de fond du formulaire
+  static const Color primaryRedColor = Color.fromARGB(255, 255, 0, 0); // Couleur red principale
+  static const Color greyTextColor = Colors.grey; // Couleur de texte grise
+  static const Color darkTextColor = Color(0xFF333333); // Couleur de texte foncée (pour le formulaire)
+  static const Color lightTextColor = Colors.white70; // Couleur de texte claire (pour le fond)
+  static const Color toggleButtonBg = Color(0xFFF0F0F0); // Couleur de fond du sélecteur de type
 
   // --- Animation and Visibility State ---
-  bool _isFormVisible = true; // Start visible
-  static const Duration _slideDuration = Duration(milliseconds: 350);
+  bool _isFormVisible = true; // Le formulaire est visible au démarrage
+  static const Duration _slideDuration = Duration(milliseconds: 350); // Durée de l'animation du panneau
 
   // --- Controllers and Form State Variables ---
+  // Contrôleurs pour récupérer le texte des champs
   final _firstNameController = TextEditingController();
-  final _emailController = TextEditingController(); // Using email
+  final _emailController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  String _selectedUserType = 'merchant';
-  String? _selectedCompanyLocation;
-  String? _selectedIndustry;
-  bool _acceptedPrivacyPolicy = false;
+  // Variables pour l'état du formulaire
+  String _selectedUserType = 'merchant'; // Type d'utilisateur par défaut
+  String? _selectedCompanyLocation; // Lieu de l'entreprise (nullable)
+  String? _selectedIndustry; // Secteur d'activité (nullable)
+  bool _acceptedPrivacyPolicy = false; // Case à cocher politique de confidentialité
 
+  // Variables pour l'état de chargement et les messages d'erreur
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Example data for dropdowns - Replace with your actual data
-  final List<String> _companyLocations = ['United States', 'Canada', 'France', 'Germany', 'United Kingdom', 'Other'];
+  // Données exemples pour les menus déroulants (à remplacer par vos données réelles)
+  final List<String> _companyLocations = ['United States', 'Canada', 'France', 'Germany', 'United Kingdom', 'Belgium', 'Other'];
   final List<String> _industries = ['Technology', 'Finance', 'Healthcare', 'Retail', 'Education', 'Other'];
 
   // --- Dispose Controllers ---
+  // Libère les ressources des contrôleurs quand le widget est supprimé
   @override
   void dispose() {
     _firstNameController.dispose();
-    _emailController.dispose(); // Dispose correct controller
+    _emailController.dispose();
     _phoneNumberController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   // --- Validation Logic ---
+  // Fonctions pour valider les champs du formulaire
   String? _validateRequired(String? value, String fieldName) {
-    if (value == null || value.trim().isEmpty) { return '$fieldName is required'; }
-    return null;
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName est requis'; // Message d'erreur si le champ est vide
+    }
+    return null; // Pas d'erreur
   }
-   String? _validateDropdown(String? value, String fieldName) {
-    if (value == null) { return 'Please select $fieldName'; }
-    return null;
+  String? _validateDropdown(String? value, String fieldName) {
+    if (value == null) {
+      return 'Veuillez sélectionner $fieldName'; // Message si aucune option n'est choisie
+    }
+    return null; // Pas d'erreur
   }
   String? _validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) { return 'Email is required'; }
+    if (value == null || value.trim().isEmpty) {
+      return 'L\'email est requis';
+    }
+    // Expression régulière simple pour vérifier le format de l'email
     final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-    if (!emailRegex.hasMatch(value)) { return 'Please enter a valid email format'; }
-    return null;
+    if (!emailRegex.hasMatch(value)) {
+      return 'Veuillez entrer un format d\'email valide';
+    }
+    return null; // Pas d'erreur
   }
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) { return 'Password is required'; }
-    if (value.length < 6) { return 'Password must be at least 6 characters long'; }
-    return null;
+    if (value == null || value.isEmpty) {
+      return 'Le mot de passe est requis';
+    }
+    if (value.length < 6) {
+      return 'Le mot de passe doit contenir au moins 6 caractères';
+    }
+    return null; // Pas d'erreur
   }
 
   // --- Registration Logic (_register) ---
+  // Fonction appelée lors de la soumission du formulaire
   Future<void> _register() async {
-    setState(() { _errorMessage = null; });
+    setState(() { _errorMessage = null; }); // Réinitialise le message d'erreur
 
+    // Vérifie si le formulaire est valide
     if (_formKey.currentState!.validate()) {
-      setState(() { _isLoading = true; });
+      setState(() { _isLoading = true; }); // Active l'indicateur de chargement
 
-      // Collect data including the correct email controller
+      // Récupère les données du formulaire
       final dataToSend = {
         'userType': _selectedUserType,
         'firstName': _firstNameController.text,
         'companyLocation': _selectedCompanyLocation,
-        'email': _emailController.text, // Using 'email' key
+        'email': _emailController.text, // Utilise la bonne clé 'email'
         'industry': _selectedIndustry,
         'phoneNumber': _phoneNumberController.text,
         'password': _passwordController.text,
         'acceptedPrivacyPolicy': _acceptedPrivacyPolicy,
       };
 
-      // --> IMPORTANT: Replace with your actual backend URL <--
+      // --> IMPORTANT : Remplacez par l'URL réelle de votre backend <--
       const String apiUrl = 'http://localhost:3000/api/auth/register';
 
       try {
+        // Envoie les données au backend via une requête POST HTTP
         final response = await http.post(
           Uri.parse(apiUrl),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode(dataToSend),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'}, // Spécifie le type de contenu
+          body: jsonEncode(dataToSend), // Encode les données en JSON
         );
 
+        // Tente de décoder la réponse JSON
         dynamic responseBody;
-        try { responseBody = jsonDecode(response.body); }
-        catch (e) {
-          print("Error decoding JSON: $e | Response: ${response.body}");
-          responseBody = {'message': 'Invalid response from server (Status: ${response.statusCode})'};
+        try {
+          responseBody = jsonDecode(response.body);
+        } catch (e) {
+          // Gère les erreurs si la réponse n'est pas du JSON valide
+          print("Erreur de décodage JSON : $e | Réponse : ${response.body}");
+          responseBody = {'message': 'Réponse invalide du serveur (Statut : ${response.statusCode})'};
         }
 
-        if (response.statusCode == 201) {
-          final successMsg = responseBody['message'] ?? 'Registration successful!';
+        // Vérifie le code de statut de la réponse
+        if (response.statusCode == 201) { // 201 Created = Succès
+          final successMsg = responseBody['message'] ?? 'Inscription réussie !';
           setState(() {
-            _isLoading = false;
-            // Reset form fields and state
-             _formKey.currentState?.reset();
+            _isLoading = false; // Désactive le chargement
+            // Réinitialise les champs et l'état du formulaire
+            _formKey.currentState?.reset();
             _firstNameController.clear();
             _emailController.clear();
             _phoneNumberController.clear();
@@ -126,237 +152,257 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _selectedIndustry = null;
             _acceptedPrivacyPolicy = false;
             _selectedUserType = 'merchant';
-            // Optionally close the panel after success
+            // Optionnel : Fermer le panneau après succès
             // _isFormVisible = false;
           });
 
-          if (mounted) {
-             ScaffoldMessenger.of(context).showSnackBar(
-               SnackBar(content: Text(successMsg), backgroundColor: Colors.green, duration: const Duration(seconds: 3)),
+          // Affiche un message de succès (SnackBar)
+          if (mounted) { // Vérifie si le widget est toujours monté
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(successMsg), backgroundColor: Colors.green, duration: const Duration(seconds: 3)),
             );
           }
-        } else { // Handle backend errors (4xx, 5xx)
+        } else { // Gère les erreurs du backend (4xx, 5xx)
           setState(() {
-            _errorMessage = responseBody['message'] ?? 'An error occurred: Status ${response.statusCode}';
-            _isLoading = false;
+            _errorMessage = responseBody['message'] ?? 'Une erreur est survenue : Statut ${response.statusCode}';
+            _isLoading = false; // Désactive le chargement
           });
         }
-      } catch (e) { // Handle network errors
-        print('Registration Error: $e');
+      } catch (e) { // Gère les erreurs réseau (pas de connexion, etc.)
+        print('Erreur d\'inscription : $e');
         if (mounted) {
           setState(() {
-            _errorMessage = 'Could not connect to the server. Please try again.';
-            _isLoading = false;
+            _errorMessage = 'Impossible de se connecter au serveur. Veuillez réessayer.';
+            _isLoading = false; // Désactive le chargement
           });
         }
       }
-    } else { // Form validation failed
+    } else { // La validation du formulaire a échoué
       if (mounted) {
+        // Affiche un message indiquant de corriger les erreurs
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fix the errors in the form'), backgroundColor: Colors.red),
+          const SnackBar(content: Text('Veuillez corriger les erreurs dans le formulaire'), backgroundColor: Colors.red),
         );
       }
     }
   }
 
   // --- Build Method (UI Structure with Animation) ---
+  // Construit l'interface utilisateur de l'écran
   @override
   Widget build(BuildContext context) {
+    // Récupère la largeur de l'écran pour le dimensionnement adaptatif
     final screenWidth = MediaQuery.of(context).size.width;
-    final formWidth = screenWidth * 0.4; // Define panel width
+    // Définit la largeur du panneau de formulaire (40% de la largeur de l'écran)
+    final formWidth = screenWidth * 0.4;
 
     return Scaffold(
-      // backgroundColor: darkBackgroundColor, // Base background is dark
-      body: Stack(
+      // backgroundColor: darkBackgroundColor, // Le fond est maintenant géré par le Container avec l'image
+      body: Stack( // Utilise un Stack pour superposer les éléments (fond, formulaire, bouton)
         children: [
-          // --- Layer 1: Dark Background (Always visible) ---
-Container(
-            width: double.infinity, // Assure qu'il prend toute la largeur
-            height: double.infinity, // Assure qu'il prend toute la hauteur
-            decoration: BoxDecoration(
+          // --- Couche 1 : Fond avec Image (Toujours visible) ---
+          Container(
+            width: double.infinity, // Prend toute la largeur
+            height: double.infinity, // Prend toute la hauteur
+            decoration: const BoxDecoration( // Utilise 'decoration' pour l'image de fond
               image: DecorationImage(
-              image: AssetImage('assets/images/background.jpg'), // <-- Chemin vers TON image
-              fit: BoxFit.cover, // <-- Pour que l'image couvre tout l'écran (responsive)
+                image: AssetImage('assets/images/background.jpg'), // Chemin vers votre image de fond
+                fit: BoxFit.cover, // Assure que l'image couvre tout le conteneur (responsive)
+              ),
             ),
-),
-            // Ajouter du Padding général pour le contenu
+            // Padding pour le contenu affiché par-dessus l'image de fond
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 40.0), // Ajuste le padding
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // Aligner logo, titre, sous-titre à gauche
+              padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 40.0), // Padding général
+              child: Column( // Colonne principale pour le contenu du fond
+                crossAxisAlignment: CrossAxisAlignment.start, // Aligne le logo à gauche
                 children: [
                   // --- Logo ---
-                  // --> Assure-toi que le chemin est correct <--
                   Image.asset(
-                    'assets/images/logo.png',
-                    height: 35,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, color: Colors.white, size: 35),
+                    'assets/images/logo.png', // Chemin vers votre logo
+                    height: 50,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, color: Colors.white, size: 35), // Icône de secours
                   ),
                   const SizedBox(height: 80), // Espace après le logo
 
-                  // --- Titre ---
-                  const Text(
-                    'Manage your Money\nAnywhere',
-                    style: TextStyle(
-                      fontSize: 38,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      height: 1.3,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                  // --- Spacer pour pousser la section Titre/Boîtes vers le centre vertical ---
+                  const Spacer(flex: 1), // Moins d'espace en haut
 
-                  // --- Sous-titre ---
-                  const Text(
-                    'View all the analytics and grow your business\nfrom anywhere!',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: lightTextColor, // Utilise la constante définie plus haut
-                      height: 1.5,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-
-                  // --- Spacer pour pousser les boîtes vers le centre vertical ---
-                  const Spacer(),
-
-Center(
-                    child: Row(
-                      // Répartit l'espace horizontal équitablement autour des boîtes
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // Limite la largeur totale que la Row peut prendre si nécessaire
-                      // mainAxisSize: MainAxisSize.min, // Décommente si elles se collent trop
-
+                  // --- Section contenant le Titre, Sous-titre et les Boîtes d'information ---
+                  // Centre horizontalement toute cette section
+                  Center(
+                    child: Column( // Utilise une Colonne pour empiler Titre, Sous-titre et Rangée
+                      mainAxisSize: MainAxisSize.min, // La Colonne prend la hauteur minimale nécessaire
+                      crossAxisAlignment: CrossAxisAlignment.start, // Aligne Titre, Sous-titre et Rangée au DÉBUT (gauche)
                       children: [
-                        // Plus besoin de Center autour de chaque boîte ici
-                        _buildInfoBox(
-                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                        // --- Titre ---
+                        const Text(
+                          'Manage your Money\nAnywhere',
+                          style: TextStyle(
+                            fontSize: 38,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white, // Assurez-vous que le texte est lisible sur le fond
+                            height: 1.3,
+                            fontFamily: 'Inter',
+                          ),
                         ),
-                        // On peut ajouter un SizedBox horizontal si spaceEvenly ne convient pas
-                        // const SizedBox(width: 20),
-                        _buildInfoBox(
-                          "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                        ),
-                        // const SizedBox(width: 20),
-                        _buildInfoBox(
-                          "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-                        ),
-                      ],
-                    ),
-                  ), // Fin du Center pour la Row
+                        const SizedBox(height: 15), // Espace après le titre
 
-                  // --- Spacer pour centrer verticalement les boîtes ---
-                  const Spacer(),
+                        // --- Sous-titre ---
+                        const Text(
+                          'View all the analytics and grow your business\nfrom anywhere!',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: lightTextColor, // Utilise la constante de couleur claire
+                            height: 1.5, // Interligne
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        const SizedBox(height: 30), // Espace après le sous-titre
 
-                ], // Fin des children de la Column principale du fond
+                        // --- Rangée de Boîtes d'information ---
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly, // On peut commenter ou changer si on utilise des SizedBox
+                          mainAxisSize: MainAxisSize.min, // La Rangée prend la largeur minimale nécessaire
+                          children: [
+                            _buildInfoBox( // Première boîte
+                              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                            ),
+                            // <<< CHANGEMENT ICI : Ajout d'espace horizontal >>>
+                            const SizedBox(width: 20), // Espace entre la 1ère et la 2ème boîte
+                            _buildInfoBox( // Deuxième boîte
+                              "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+                            ),
+                            // <<< CHANGEMENT ICI : Ajout d'espace horizontal >>>
+                            const SizedBox(width: 20), // Espace entre la 2ème et la 3ème boîte
+                            _buildInfoBox( // Troisième boîte
+                              "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+                            ),
+                          ],
+                        ),
+                      ], // Fin des enfants de la Colonne interne (Titre + Sous-titre + Rangée)
+                    ), // Fin de la Colonne interne
+                  ), // Fin du Center pour la section Titre/Sous-titre/Boîtes
+
+                  // --- Spacer pour pousser la section Titre/Boîtes vers le centre vertical ---
+                  const Spacer(flex: 2), // Plus d'espace en bas
+
+                ], // Fin des enfants de la Colonne principale du fond
               ), // Fin du Padding
-            ), // Fin du Container de fond
+            ), // Fin du Container de fond (avec image)
           ), // Fin de la Couche 1
 
-          // --- Layer 2: Sliding Form Panel ---
-          AnimatedPositioned(
-            duration: _slideDuration,
-            curve: Curves.easeInOut,
-            top: 0,
-            bottom: 0,
-            width: formWidth,
-            // Animate the 'right' property based on visibility state
-            right: _isFormVisible ? 0 : -formWidth, // Slides off-screen to the right
+          // --- Couche 2 : Panneau de Formulaire Coulissant ---
+          AnimatedPositioned( // Widget pour animer la position
+            duration: _slideDuration, // Durée de l'animation
+            curve: Curves.easeInOut, // Courbe d'animation (accélération/décélération douce)
+            top: 0, // Collé en haut
+            bottom: 0, // Collé en bas
+            width: formWidth, // Largeur définie précédemment
+            // Anime la propriété 'right' en fonction de l'état de visibilité
+            right: _isFormVisible ? 0 : -formWidth, // 0 = visible, -formWidth = caché à droite
 
-            child: Container(
-              decoration: BoxDecoration(
-                color: formBackgroundColor,
-                borderRadius: const BorderRadius.only(
-                     topLeft: Radius.circular(25.0),
-                     bottomLeft: Radius.circular(25.0),
+            child: Container( // Le panneau lui-même
+              decoration: BoxDecoration( // Style du panneau
+                color: formBackgroundColor, // Fond blanc
+                borderRadius: const BorderRadius.only( // Coins arrondis à gauche
+                  topLeft: Radius.circular(25.0),
+                  bottomLeft: Radius.circular(25.0),
                 ),
-                boxShadow: [
+                boxShadow: [ // Ombre portée pour donner de la profondeur
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
                     blurRadius: 30,
-                    offset: const Offset(-10, 0),
+                    offset: const Offset(-10, 0), // Ombre vers la gauche
                   ),
                 ],
               ),
-              // Use a nested Stack to position the close button above the form
+              // Utilise un Stack imbriqué pour positionner le bouton de fermeture par-dessus le formulaire
               child: Stack(
                 children: [
-                  // Form content needs padding, especially at the top for the close button
+                  // Le contenu du formulaire a besoin de padding, surtout en haut pour le bouton
                   Padding(
-                    padding: const EdgeInsets.only(top: 50.0), // Space for close button
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(35.0, 20.0, 35.0, 40.0), // Left, Top, Right, Bottom padding
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
+                    padding: const EdgeInsets.only(top: 50.0), // Espace réservé pour le bouton de fermeture
+                    child: SingleChildScrollView( // Permet de faire défiler si le contenu dépasse
+                      padding: const EdgeInsets.fromLTRB(35.0, 20.0, 35.0, 40.0), // Padding interne du formulaire
+                      child: Form( // Widget Form pour la validation
+                        key: _formKey, // Clé pour identifier et contrôler le formulaire
+                        child: Column( // Colonne pour organiser les champs verticalement
+                          crossAxisAlignment: CrossAxisAlignment.stretch, // Étire les éléments enfants horizontalement
+                          mainAxisSize: MainAxisSize.min, // Prend la hauteur minimale
                           children: [
-                            // --- Form Title ---
+                            // --- Titre du Formulaire ---
                             const Text(
                               'Create an account',
                               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: darkTextColor, fontFamily: 'Inter'),
-                              textAlign: TextAlign.center,
+                              textAlign: TextAlign.center, // Centre le titre
                             ),
-                            const SizedBox(height: 35),
+                            const SizedBox(height: 35), // Espace
 
-                            // --- Form Elements (using helper methods) ---
-                            _buildUserTypeToggle(),
+                            // --- Éléments du Formulaire (utilisant les fonctions helper) ---
+                            _buildUserTypeToggle(), // Sélecteur Merchant/Agent
                             const SizedBox(height: 25),
-                            _buildTextFormField(_firstNameController, 'First Name', validator: (v) => _validateRequired(v, 'First Name')),
+                            _buildTextFormField(_firstNameController, 'First Name', validator: (v) => _validateRequired(v, 'First Name')), // Champ Prénom
                             const SizedBox(height: 18),
-                            _buildDropdownFormField(hint: 'Where is your company based?', value: _selectedCompanyLocation, items: _companyLocations, onChanged: (v) => setState(() => _selectedCompanyLocation = v), validator: (v) => _validateDropdown(v, 'location')),
+                            _buildDropdownFormField(hint: 'Where is your company based?', value: _selectedCompanyLocation, items: _companyLocations, onChanged: (v) => setState(() => _selectedCompanyLocation = v), validator: (v) => _validateDropdown(v, 'location')), // Menu déroulant Lieu
                             const SizedBox(height: 18),
-                            _buildTextFormField(_emailController, 'Email', keyboardType: TextInputType.emailAddress, validator: _validateEmail), // Correct controller and label
+                            _buildTextFormField(_emailController, 'Email', keyboardType: TextInputType.emailAddress, validator: _validateEmail), // Champ Email
                             const SizedBox(height: 18),
-                            _buildDropdownFormField(hint: 'Please select an Industry', value: _selectedIndustry, items: _industries, onChanged: (v) => setState(() => _selectedIndustry = v), validator: (v) => _validateDropdown(v, 'industry')),
+                            _buildDropdownFormField(hint: 'Please select an Industry', value: _selectedIndustry, items: _industries, onChanged: (v) => setState(() => _selectedIndustry = v), validator: (v) => _validateDropdown(v, 'industry')), // Menu déroulant Secteur
                             const SizedBox(height: 18),
-                            _buildTextFormField(_phoneNumberController, 'Phone number', keyboardType: TextInputType.phone, validator: (v) => _validateRequired(v, 'Phone number')),
+                            _buildTextFormField(_phoneNumberController, 'Phone number', keyboardType: TextInputType.phone, validator: (v) => _validateRequired(v, 'Phone number')), // Champ Téléphone
                             const SizedBox(height: 18),
-                            _buildTextFormField(_passwordController, 'Password', obscureText: true, validator: _validatePassword),
+                            _buildTextFormField(_passwordController, 'Password', obscureText: true, validator: _validatePassword), // Champ Mot de passe
                             const SizedBox(height: 25),
-                            _buildPrivacyPolicyCheckbox(),
+                            _buildPrivacyPolicyCheckbox(), // Case à cocher Politique de confidentialité
                             const SizedBox(height: 25),
 
-                            // --- Error Message Display ---
-                            if (_errorMessage != null) Padding(padding: const EdgeInsets.only(bottom: 15.0), child: Text(_errorMessage!, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontFamily: 'Inter', fontSize: 13), textAlign: TextAlign.center)),
-
-                            // --- Submit Button ---
-                            ElevatedButton(
-                              onPressed: _isLoading ? null : _register,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryOrangeColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 18),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-                                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
-                                elevation: 3
+                            // --- Affichage du Message d'Erreur ---
+                            // S'affiche seulement si _errorMessage n'est pas null
+                            if (_errorMessage != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 15.0),
+                                child: Text(
+                                  _errorMessage!,
+                                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontFamily: 'Inter', fontSize: 13),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                              child: _isLoading
-                                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                                : const Text('Create an Account'),
-                            ),
-                            const SizedBox(height: 30),
 
-                            // --- Login Link ---
-                            _buildLoginLink(greyTextColor, primaryOrangeColor),
+                            // --- Bouton de Soumission ---
+                            ElevatedButton(
+                              onPressed: _isLoading ? null : _register, // Désactivé si _isLoading est true
+                              style: ElevatedButton.styleFrom( // Style du bouton
+                                backgroundColor: primaryRedColor, // Fond rouge
+                                foregroundColor: Colors.white, // Texte blanc
+                                padding: const EdgeInsets.symmetric(vertical: 18), // Padding vertical
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), // Coins arrondis
+                                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                elevation: 3, // Légère ombre
+                              ),
+                              child: _isLoading // Affiche un indicateur de chargement si _isLoading est true
+                                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
+                                : const Text('Create an Account'), // Sinon, affiche le texte
+                            ),
+                            const SizedBox(height: 30), // Espace
+
+                            // --- Lien de Connexion ---
+                            _buildLoginLink(greyTextColor, primaryRedColor), // Lien "Log in"
                           ],
                         ),
                       ),
                     ),
                   ),
 
-                  // --- Close Button (Positioned within the form panel's Stack) ---
+                  // --- Bouton de Fermeture (Positionné dans le Stack du panneau) ---
                   Positioned(
-                    top: 15,
-                    right: 15,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: greyTextColor),
+                    top: 15, // Distance du haut
+                    right: 15, // Distance de la droite
+                    child: IconButton( // Bouton avec icône
+                      icon: const Icon(Icons.close, color: greyTextColor), // Icône 'X'
                       iconSize: 28,
-                      tooltip: 'Close form',
+                      tooltip: 'Fermer le formulaire', // Texte d'aide au survol
                       onPressed: () {
-                        // Set visibility state to false, triggering the animation
+                        // Met l'état de visibilité à false, déclenchant l'animation de sortie
                         setState(() { _isFormVisible = false; });
                       },
                     ),
@@ -366,24 +412,25 @@ Center(
             ),
           ),
 
-          if (!_isFormVisible)
+          // --- Couche 3 : Bouton "Create Account" (Visible quand le formulaire est caché) ---
+          // Ce bouton apparaît en haut à droite quand le panneau est sorti
+          if (!_isFormVisible) // Conditionnellement affiché
             Positioned(
               top: 20, // Espace depuis le haut
               right: 25, // Espace depuis la droite
-              child: TextButton( // Ou ElevatedButton si tu préfères un fond
+              child: ElevatedButton( // Utilise ElevatedButton pour la cohérence
                 onPressed: () {
-                  // Remet _isFormVisible à true pour faire glisser le panneau
+                  // Remet _isFormVisible à true pour faire rentrer le panneau
                   setState(() {
                     _isFormVisible = true;
                   });
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrangeColor, // Couleur orange (depuis les constantes de classe)
+                style: ElevatedButton.styleFrom( // Style similaire au bouton de soumission
+                  backgroundColor: primaryRedColor, // Fond rouge
                   foregroundColor: Colors.white,      // Texte blanc
-                  // Ajuster le padding pour un bouton de coin (un peu moins haut)
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14), // Padding ajusté
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0), 
+                    borderRadius: BorderRadius.circular(10.0), // Coins arrondis
                   ),
                   textStyle: const TextStyle(
                     fontSize: 14,
@@ -396,28 +443,27 @@ Center(
               ),
             ),
 
-        ],
-      ),
-    );
+        ], // Fin des enfants du Stack principal
+      ), // Fin du Stack principal
+    ); // Fin du Scaffold
   }
 
 
   // --- Helper Widgets ---
-  // (These remain unchanged from the previous corrected version,
-  // they now correctly access the class-level color constants)
+  // Fonctions pour construire des parties répétitives de l'UI (widgets)
 
-    Widget _buildInfoBox(String text) {
-    // Style pour le texte à l'intérieur des boîtes
+  // Construit une boîte d'information (utilisée en bas à gauche)
+  Widget _buildInfoBox(String text) {
     const infoTextStyle = TextStyle(
       color: Colors.white, // Texte blanc
       fontSize: 14,
-      height: 1.6, // Espacement des lignes
+      height: 1.6, // Interligne
       fontFamily: 'Inter',
     );
 
     return Container(
-      padding: const EdgeInsets.all(25.0), // Padding intérieur
-      constraints: const BoxConstraints(maxWidth: 350), // Largeur max pour éviter qu'elles soient trop larges
+      padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 40.0), // Padding interne (vertical augmenté)
+      constraints: const BoxConstraints(maxWidth: 350), // Largeur maximale
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.35), // Fond noir semi-transparent
         borderRadius: BorderRadius.circular(15.0), // Coins arrondis
@@ -425,94 +471,146 @@ Center(
       child: Text(
         text,
         style: infoTextStyle,
-        textAlign: TextAlign.center, // Centrer le texte dans la boîte
+        textAlign: TextAlign.center, // Centre le texte
       ),
     );
   }
 
+  // Construit un champ de texte standard pour le formulaire
   Widget _buildTextFormField(TextEditingController controller, String label, {bool obscureText = false, TextInputType? keyboardType, String? Function(String?)? validator}) {
     return TextFormField(
-      controller: controller, obscureText: obscureText, keyboardType: keyboardType, validator: validator,
-      style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: darkTextColor),
-      decoration: InputDecoration(
-        hintText: label, hintStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: Colors.grey),
+      controller: controller, // Lie le contrôleur
+      obscureText: obscureText, // Cache le texte si true (pour mot de passe)
+      keyboardType: keyboardType, // Type de clavier (email, phone, etc.)
+      validator: validator, // Fonction de validation
+      style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: darkTextColor), // Style du texte saisi
+      decoration: InputDecoration( // Style du champ
+        hintText: label, // Texte indicatif (placeholder)
+        hintStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: Colors.grey), // Style du hint
+        filled: true, // Active le fond coloré
+        fillColor: const Color(0xFFF9F9F9), // Couleur de fond légère
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none), // Bordure par défaut (aucune)
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none), // Bordure quand activé (aucune)
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: primaryRedColor.withOpacity(0.5), width: 1.5)), // Bordure quand focus (rouge léger)
+        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 15.0), // Padding interne du champ
+      ),
+      textInputAction: TextInputAction.next, // Action du bouton "Entrée" (passe au champ suivant)
+    );
+  }
+
+  // Construit un menu déroulant pour le formulaire
+  Widget _buildDropdownFormField({required String hint, required String? value, required List<String> items, required void Function(String?)? onChanged, required String? Function(String?)? validator}) {
+    return DropdownButtonFormField<String>(
+      value: value, // Valeur actuellement sélectionnée
+      items: items.map((String item) => DropdownMenuItem<String>(value: item, child: Text(item, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: darkTextColor)))).toList(), // Construit les options
+      onChanged: onChanged, // Fonction appelée quand la sélection change
+      validator: validator, // Fonction de validation
+      style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: darkTextColor), // Style du texte sélectionné
+      icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey), // Icône flèche vers le bas
+      decoration: InputDecoration( // Style similaire aux champs de texte
+        hintText: hint, hintStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: Colors.grey),
         filled: true, fillColor: const Color(0xFFF9F9F9),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: primaryOrangeColor.withOpacity(0.5), width: 1.5)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: primaryRedColor.withOpacity(0.5), width: 1.5)),
         contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 15.0),
-      ), textInputAction: TextInputAction.next,
+      ),
+      isExpanded: true, // Permet au texte de l'option de prendre toute la largeur
     );
   }
 
-  Widget _buildDropdownFormField({required String hint, required String? value, required List<String> items, required void Function(String?)? onChanged, required String? Function(String?)? validator}) {
-    return DropdownButtonFormField<String>(
-      value: value, items: items.map((String item) => DropdownMenuItem<String>(value: item, child: Text(item, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: darkTextColor)))).toList(),
-      onChanged: onChanged, validator: validator,
-      style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: darkTextColor),
-      icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-      decoration: InputDecoration(
-          hintText: hint, hintStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: Colors.grey),
-          filled: true, fillColor: const Color(0xFFF9F9F9),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: primaryOrangeColor.withOpacity(0.5), width: 1.5)),
-          contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 15.0),
-      ), isExpanded: true,
-    );
-  }
-
+  // Construit le sélecteur de type d'utilisateur (Merchant/Agent)
   Widget _buildUserTypeToggle() {
     return Container(
-       padding: const EdgeInsets.all(4),
-       decoration: BoxDecoration(color: toggleButtonBg, borderRadius: BorderRadius.circular(12.0)),
-       child: Row(children: [_buildToggleButton('Merchant', 'merchant'), const SizedBox(width: 4), _buildToggleButton('Agent', 'agent')]),
+      padding: const EdgeInsets.all(4), // Petit padding autour des boutons
+      decoration: BoxDecoration(color: toggleButtonBg, borderRadius: BorderRadius.circular(12.0)), // Fond gris clair, coins arrondis
+      child: Row(children: [ // Met les boutons côte à côte
+        _buildToggleButton('Merchant', 'merchant'), // Bouton Merchant
+        const SizedBox(width: 4), // Petit espace entre les boutons
+        _buildToggleButton('Agent', 'agent'), // Bouton Agent
+      ]),
     );
   }
 
+  // Construit un bouton individuel pour le sélecteur de type
   Widget _buildToggleButton(String text, String value) {
-      bool isSelected = _selectedUserType == value;
-      return Expanded(child: ElevatedButton(
-          onPressed: () => setState(() => _selectedUserType = value),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? Colors.black : Colors.transparent, foregroundColor: isSelected ? Colors.white : darkTextColor,
-            elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-            padding: const EdgeInsets.symmetric(vertical: 14), shadowColor: Colors.transparent,
-          ),
-          child: Text(text, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 14)),
-      ));
+    bool isSelected = _selectedUserType == value; // Vérifie si ce bouton est sélectionné
+    return Expanded( // Permet aux boutons de partager l'espace équitablement
+      child: ElevatedButton(
+        onPressed: () => setState(() => _selectedUserType = value), // Met à jour l'état quand cliqué
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? Colors.black : Colors.transparent, // Fond noir si sélectionné, transparent sinon
+          foregroundColor: isSelected ? Colors.white : darkTextColor, // Texte blanc si sélectionné, foncé sinon
+          elevation: 0, // Pas d'ombre
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)), // Coins arrondis internes
+          padding: const EdgeInsets.symmetric(vertical: 14), // Padding vertical
+          shadowColor: Colors.transparent, // Pas d'ombre au clic
+        ),
+        child: Text(text, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 14)),
+      ),
+    );
   }
 
+  // Construit la case à cocher pour la politique de confidentialité avec validation
   Widget _buildPrivacyPolicyCheckbox() {
-    return FormField<bool>(
-       key: ValueKey('privacyCheckbox$_acceptedPrivacyPolicy'), initialValue: _acceptedPrivacyPolicy,
-       validator: (value) => (value == false) ? 'You must accept the privacy policy' : null,
-       builder: (FormFieldState<bool> state) {
-          return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            InkWell(onTap: () => setState(() { _acceptedPrivacyPolicy = !_acceptedPrivacyPolicy; state.didChange(_acceptedPrivacyPolicy); }),
-              child: Row(children: [
-                SizedBox(height: 20, width: 20, child: Checkbox(
-                    value: _acceptedPrivacyPolicy, onChanged: (v) => setState(() { _acceptedPrivacyPolicy = v ?? false; state.didChange(_acceptedPrivacyPolicy); }),
-                    activeColor: primaryOrangeColor, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, visualDensity: VisualDensity.compact,
-                    side: BorderSide(color: state.hasError ? Colors.red : Colors.grey.shade400, width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                )),
-                const SizedBox(width: 8),
-                Expanded(child: Text('I accept the Privacy Policy', style: TextStyle(fontSize: 13, fontFamily: 'Inter', color: state.hasError ? Colors.red : darkTextColor.withOpacity(0.8)))),
-              ]),
+    return FormField<bool>( // Utilise FormField pour intégrer la validation
+      key: ValueKey('privacyCheckbox$_acceptedPrivacyPolicy'), // Clé pour la reconstruction si nécessaire
+      initialValue: _acceptedPrivacyPolicy, // Valeur initiale
+      validator: (value) => (value == false) ? 'Vous devez accepter la politique de confidentialité' : null, // Règle de validation
+      builder: (FormFieldState<bool> state) { // Construit l'UI de la case à cocher et du message d'erreur
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          InkWell( // Rend toute la ligne cliquable
+            onTap: () => setState(() { // Inverse l'état et notifie le FormField du changement
+              _acceptedPrivacyPolicy = !_acceptedPrivacyPolicy;
+              state.didChange(_acceptedPrivacyPolicy);
+            }),
+            child: Row(children: [
+              SizedBox(height: 20, width: 20, child: Checkbox( // La case à cocher visuelle
+                value: _acceptedPrivacyPolicy,
+                onChanged: (v) => setState(() { // Met à jour l'état et notifie le FormField
+                  _acceptedPrivacyPolicy = v ?? false;
+                  state.didChange(_acceptedPrivacyPolicy);
+                }),
+                activeColor: primaryRedColor, // Couleur quand cochée
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Réduit la zone de clic
+                visualDensity: VisualDensity.compact, // Rend la case plus compacte
+                side: BorderSide(color: state.hasError ? Colors.red : Colors.grey.shade400, width: 1.5), // Bordure rouge si erreur
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)), // Coins légèrement arrondis
+              )),
+              const SizedBox(width: 8), // Espace entre la case et le texte
+              // Texte cliquable
+              Expanded(child: Text('J\'accepte la Politique de Confidentialité', style: TextStyle(fontSize: 13, fontFamily: 'Inter', color: state.hasError ? Colors.red : darkTextColor.withOpacity(0.8)))),
+            ]),
+          ),
+          // Affiche le message d'erreur sous la case si la validation échoue
+          if (state.hasError)
+            Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Text(state.errorText!, style: const TextStyle(color: Colors.red, fontSize: 12, fontFamily: 'Inter')),
             ),
-            if (state.hasError) Padding(padding: const EdgeInsets.only(top: 6.0), child: Text(state.errorText!, style: const TextStyle(color: Colors.red, fontSize: 12, fontFamily: 'Inter'))),
-          ]);
-       },
+        ]);
+      },
     );
   }
 
+  // Construit le lien "Log in" en bas du formulaire
   Widget _buildLoginLink(Color normalColor, Color linkColor) {
-    return Text.rich(
-      TextSpan(text: 'Already have an account? ', style: TextStyle(color: normalColor, fontSize: 14, fontFamily: 'Inter'),
-        children: <TextSpan>[TextSpan(text: 'Log in', style: TextStyle(color: linkColor, fontWeight: FontWeight.w600, fontFamily: 'Inter', fontSize: 14),
-            recognizer: TapGestureRecognizer()..onTap = () { print('Log in link tapped!'); /* TODO: Navigate */ },
-        )],
-      ), textAlign: TextAlign.center,
+    return Text.rich( // Permet de combiner différents styles de texte
+      TextSpan(
+        text: 'Already have an account ? ', // Partie normale du texte
+        style: TextStyle(color: normalColor, fontSize: 14, fontFamily: 'Inter'),
+        children: <TextSpan>[ // Enfants avec styles différents
+          TextSpan(
+            text: 'Log In', // Partie cliquable (lien)
+            style: TextStyle(color: linkColor, fontWeight: FontWeight.w600, fontFamily: 'Inter', fontSize: 14), // Style du lien (rouge et gras)
+            recognizer: TapGestureRecognizer()..onTap = () { // Rend le texte cliquable
+              print('Lien Se connecter cliqué !'); // Action au clic (à remplacer par la navigation)
+              // TODO: Implémenter la navigation vers l'écran de connexion
+            },
+          ),
+        ],
+      ),
+      textAlign: TextAlign.center, // Centre le texte
     );
   }
-} // End of _RegisterScreenState class
+} // Fin de la classe _RegisterScreenState
