@@ -159,23 +159,23 @@ The app should launch. You can create a new account or use "Log In" to sign in w
 
 ```bash
 lib/
-├── main.dart                 # Modified
-├── config/                   # New folder
-│   ├── app_colors.dart       # New file
-│   └── api_config.dart       # New file
+├── main.dart               
+├── config/                   
+│   ├── app_colors.dart       
+│   └── api_config.dart       
 ├── screens/
 │   └── register/
-│       ├── register_screen.dart    # Modified (the "brain")
-│       └── widgets/                # Widgets specific to this screen
-│           ├── background_layer.dart     # Modified
-│           ├── sliding_form_panel.dart   # Modified
-│           └── form_elements/            # New folder
-│               ├── custom_dropdown.dart          # New file
-│               ├── custom_text_field.dart        # New file
-│               ├── login_link.dart               # New file
-│               ├── privacy_policy_checkbox.dart  # New file
-│               └── user_type_toggle.dart         # New file
-├── services/                 # New folder
-│   └── auth_service.dart     # New file
-└── utils/                    # New folder
-    └── validators.dart       # New file
+│       ├── register_screen.dart    
+│       └── widgets/                
+│           ├── background_layer.dart     
+│           ├── sliding_form_panel.dart   
+│           └── form_elements/            
+│               ├── custom_dropdown.dart          
+│               ├── custom_text_field.dart        
+│               ├── login_link.dart               
+│               ├── privacy_policy_checkbox.dart  
+│               └── user_type_toggle.dart         
+├── services/                 
+│   └── auth_service.dart     
+└── utils/                   
+    └── validators.dart       
