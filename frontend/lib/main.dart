@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Test Flutter', // Le titre de l'application (peut être vu dans l'onglet du navigateur)
+      title: 'Test Flutter', // Le titre de l'application 
       theme: ThemeData(
         // Police par défaut pour toute l'application
         fontFamily: 'Inter',
@@ -22,7 +22,6 @@ class MyApp extends StatelessWidget {
           seedColor: AppColors.primaryRed, // Couleur de base pour générer la palette
           primary: AppColors.primaryRed,   // Couleur primaire explicite
           error: AppColors.errorRed,     // Couleur pour les erreurs
-          // Vous pouvez définir d'autres couleurs ici: secondary, background, surface, etc.
           // background: AppColors.formBackground, // Couleur de fond par défaut des Scaffold, etc.
         ),
 
